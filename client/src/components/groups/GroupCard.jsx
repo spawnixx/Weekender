@@ -38,9 +38,7 @@ export default function GroupCard({ group }) {
     >
       <CardHeader>
         <div className="flex items-start justify-between gap-3">
-          <CardTitle className="font-display text-xl font-semibold">
-            {group.name}
-          </CardTitle>
+          <CardTitle className="text-xl font-semibold">{group.name}</CardTitle>
 
           <Badge
             variant={group.role === "owner" ? "default" : "outline"}

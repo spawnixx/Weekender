@@ -93,9 +93,7 @@ export default function AuthPage() {
 
             <TabsContent value="login" className="mt-8">
               <div className="mb-7">
-                <h2 className="font-display text-3xl font-semibold">
-                  Welcome back
-                </h2>
+                <h2 className="text-3xl font-semibold">Welcome back</h2>
 
                 <p className="mt-1 text-sm text-muted-foreground">
                   Your groups are waiting for you.
@@ -107,9 +105,7 @@ export default function AuthPage() {
 
             <TabsContent value="register" className="mt-8">
               <div className="mb-7">
-                <h2 className="font-display text-3xl font-semibold">
-                  Set up your account
-                </h2>
+                <h2 className="text-3xl font-semibold">Set up your account</h2>
 
                 <p className="mt-1 text-sm text-muted-foreground">
                   Create an account and start planning with your group.

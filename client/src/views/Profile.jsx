@@ -20,9 +20,7 @@ function Profile() {
             Account
           </p>
 
-          <h1 className="font-display mt-2 text-3xl font-semibold">
-            Profile settings
-          </h1>
+          <h1 className="mt-2 text-3xl font-semibold">Profile settings</h1>
         </div>
 
         <section className="flex items-center gap-4 rounded-xl border bg-background px-5 py-4">
@@ -38,7 +36,7 @@ function Profile() {
 
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <h2 className="font-display truncate text-xl font-semibold">
+              <h2 className="truncate text-xl font-semibold">
                 {firstName} {lastName}
               </h2>
             </div>
