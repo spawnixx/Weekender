@@ -15,6 +15,8 @@ export const tokenAuth = (req, res, next) => {
     return next();
   } catch (err) {
     console.error("JWT VERIFY ERROR:", err.message);
-    return next(new ExpressError(err.message, 401));
+    return next(
+      new ExpressError("Invalid or expired authentication token", 401),
+    );
   }
 };

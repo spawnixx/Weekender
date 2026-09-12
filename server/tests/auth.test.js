@@ -5,16 +5,16 @@ import { createTestUser } from "./helpers/userHelper.js";
 import { db } from "../src/db.js";
 
 describe("POST /users/login", () => {
-  it("returns 400 when email does not exist", async () => {
+  it("returns 401 when email does not exist", async () => {
     const res = await request(app).post("/users/login").send({
       email: "doesnotexist@test.com",
       password: "password123",
     });
-    expect(res.status).toBe(400);
-    expect(res.body.error.message).toBe("Invalid Email. Try again");
+    expect(res.status).toBe(401);
+    expect(res.body.error.message).toBe("Invalid email or password");
   });
 
-  it("returns 400 when the password is wrong", async () => {
+  it("returns 401 when the password is wrong", async () => {
     await createTestUser();
 
     const res = await request(app).post("/users/login").send({
@@ -22,8 +22,8 @@ describe("POST /users/login", () => {
       password: "thisisnotthepassword",
     });
 
-    expect(res.status).toBe(400);
-    expect(res.body.error.message).toBe("Incorrect Password. Try again");
+    expect(res.status).toBe(401);
+    expect(res.body.error.message).toBe("Invalid email or password");
   });
 
   it("returns 400 when email/password missing", async () => {
@@ -114,7 +114,9 @@ describe("GET /users/profile", () => {
     const res = await request(app).get("/users/profile");
 
     expect(res.status).toBe(401);
-    expect(res.body.error.message).toBe("Authenticated required");
+    expect(res.body.error.message).toBe(
+      "Invalid or expired authentication token",
+    );
   });
   it("returns the logged-in user", async () => {
     await createTestUser();

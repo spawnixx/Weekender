@@ -19,6 +19,9 @@ CREATE TABLE groups (
     
 );
 
+CREATE INDEX idx_groups_owner_id
+ON groups (owner_id);
+
 CREATE TYPE member_role AS ENUM (
     'owner',
     'member'
@@ -31,6 +34,9 @@ CREATE TABLE group_members (
   
   PRIMARY KEY (user_id, group_id)
 );
+
+CREATE INDEX idx_group_members_group_id
+ON group_members (group_id);
 
 
 CREATE TYPE event_status AS ENUM (
@@ -68,6 +74,12 @@ CREATE UNIQUE INDEX unique_group_ticketmaster_event
 ON events (groupid, ticketmasterid)
 WHERE ticketmasterid IS NOT NULL;
 
+CREATE INDEX idx_events_group_id
+ON events (group_id);
+
+CREATE INDEX idx_events_proposed_by
+ON events (proposed_by);
+
 CREATE TABLE event_votes (
     eventId INTEGER REFERENCES events(id) ON DELETE CASCADE,
     userId INTEGER REFERENCES users(id) ON DELETE CASCADE,
@@ -75,3 +87,6 @@ CREATE TABLE event_votes (
 
     PRIMARY KEY (eventId, userId)
 );
+
+CREATE INDEX idx_event_votes_user_id
+ON event_votes (user_id);

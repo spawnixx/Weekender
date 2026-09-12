@@ -7,6 +7,7 @@ import { db } from "../src/db.js";
 import { createTestUser } from "./helpers/userHelper.js";
 import { createTestGroup } from "./helpers/groupHelper.js";
 import { createTestEvent } from "./helpers/eventHelper.js";
+import { Event } from "../src/models/eventModel.js";
 
 describe("POST /groups/:id/events", () => {
   it("returns 401 when not authenticated", async () => {
@@ -234,8 +235,19 @@ describe("POST /groups/:groupId/events/:eventId/vote", () => {
     const owner = await createTestUser({
       email: "owner@test.com",
     });
+    const member = await createTestUser({
+      email: "member@test.com",
+    });
 
     const group = await createTestGroup(owner.id);
+
+    await db.query(
+      `
+      INSERT INTO group_members (group_id, user_id, role)
+      VALUES ($1, $2, 'member')
+    `,
+      [group.id, member.id],
+    );
 
     const event = await createTestEvent(group.id, owner.id);
 
@@ -302,38 +314,65 @@ describe("POST /groups/:groupId/events/:eventId/vote", () => {
 
     expect(result.rows).toHaveLength(0);
   });
-  it("closes an event when voting has expired", async () => {
+  it("closes an expired event without a majority", async () => {
     const owner = await createTestUser({
       email: "owner@test.com",
     });
 
     const group = await createTestGroup(owner.id);
+    const event = await createTestEvent(group.id, owner.id);
 
-    const event = await createTestEvent(group.id, owner.id, {
-      votingEnds: new Date(Date.now() - 24 * 60 * 60 * 1000),
-      startDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
+    await db.query(
+      `
+      UPDATE events
+      SET votingends = NOW() - INTERVAL '1 minute'
+      WHERE id = $1
+    `,
+      [event.id],
+    );
+
+    await Event.closeExpiredEvents();
+
+    const result = await db.query(
+      `
+      SELECT status
+      FROM events
+      WHERE id = $1
+    `,
+      [event.id],
+    );
+
+    expect(result.rows[0].status).toBe("closed");
+  });
+  it("rejects a vote when voting has expired", async () => {
+    const owner = await createTestUser({
+      email: "owner@test.com",
     });
 
+    const group = await createTestGroup(owner.id);
+    const event = await createTestEvent(group.id, owner.id);
     const agent = request.agent(app);
+
+    await db.query(
+      `
+      UPDATE events
+      SET votingends = NOW() - INTERVAL '1 minute'
+      WHERE id = $1
+    `,
+      [event.id],
+    );
 
     await agent.post("/users/login").send({
       email: "owner@test.com",
       password: "password123",
     });
 
-    const res = await agent.get(`/groups/${group.id}/events`);
+    const res = await agent
+      .post(`/groups/${group.id}/events/${event.id}/vote`)
+      .send({
+        vote: true,
+      });
 
-    expect(res.status).toBe(200);
-
-    const result = await db.query(
-      `
-    SELECT status
-    FROM events
-    WHERE id = $1
-    `,
-      [event.id],
-    );
-
-    expect(result.rows[0].status).toBe("closed");
+    expect(res.status).toBe(409);
   });
 });

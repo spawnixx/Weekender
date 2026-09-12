@@ -13,6 +13,41 @@ export class Group {
     return res.rows[0];
   }
 
+  static async createGroupWithOwner({ name, ownerId, inviteCode }) {
+    const client = await db.connect();
+
+    try {
+      await client.query("BEGIN");
+      const groupResult = await client.query(
+        `
+        INSERT INTO groups (name, owner_id, invite_code)
+        VALUES ($1, $2, $3)
+        RETURNING *
+      `,
+        [name, ownerId, inviteCode],
+      );
+
+      const newGroup = groupResult.rows[0];
+
+      await client.query(
+        `
+        INSERT INTO group_members (group_id, user_id, role)
+        VALUES ($1, $2, 'owner')
+      `,
+        [newGroup.id, ownerId],
+      );
+
+      await client.query("COMMIT");
+
+      return newGroup;
+    } catch (err) {
+      await client.query("ROLLBACK");
+      throw err;
+    } finally {
+      client.release();
+    }
+  }
+
   static async findById(groupId, userId) {
     const res = await db.query(
       `
@@ -135,7 +170,7 @@ export class Group {
     const res = await db.query(
       `
       INSERT INTO group_members (group_id, user_id, role)
-      Values ($1, $2, 'owner')
+      VALUES ($1, $2, 'owner')
       RETURNING *
       `,
       [groupId, userId],
@@ -147,7 +182,7 @@ export class Group {
     const res = await db.query(
       `
           INSERT INTO group_members (group_id, user_id)
-          Values ($1,$2)
+          VALUES ($1,$2)
           ON CONFLICT (user_id, group_id) DO NOTHING
           RETURNING *
           `,

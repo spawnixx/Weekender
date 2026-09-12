@@ -57,11 +57,11 @@ export async function login(req, res, next) {
     const existingUser = await User.findByEmail(email);
 
     if (!existingUser) {
-      return next(new ExpressError("Invalid Email. Try again", 400));
+      return next(new ExpressError("Invalid email or password", 401));
     }
     const auth = await bcrypt.compare(password, existingUser.password);
     if (!auth) {
-      return next(new ExpressError("Incorrect Password. Try again", 400));
+      return next(new ExpressError("Invalid email or password", 401));
     }
 
     const token = createToken(existingUser);

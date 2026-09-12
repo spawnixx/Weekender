@@ -59,13 +59,11 @@ export async function createGroup(req, res, next) {
       .slice(0, 6)
       .toUpperCase();
 
-    const newGroup = await Group.createGroup({
+    const newGroup = await Group.createGroupWithOwner({
       name,
       ownerId,
       inviteCode: newInvitecode,
     });
-
-    await Group.addOwner(newGroup.id, ownerId);
 
     return res.status(201).json({
       group: newGroup,

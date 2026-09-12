@@ -37,7 +37,6 @@ export async function createEvent(req, res, next) {
 export async function getGroupEvents(req, res, next) {
   try {
     const { id } = req.params;
-    await Event.closeExpiredEvents();
     const events = await Event.findByGroup(id);
 
     return res.json({
@@ -85,7 +84,7 @@ export async function voteEvent(req, res, next) {
     let finalStatus = "proposed";
 
     if (totalVotes === totalMembers) {
-      finalStatus = votesFor / totalMembers >= 0.51 ? "confirmed" : "closed";
+      finalStatus = votesFor > totalMembers / 2 ? "confirmed" : "closed";
 
       await Event.updateStatus(eventId, finalStatus);
     }

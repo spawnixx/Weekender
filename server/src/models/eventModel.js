@@ -256,7 +256,7 @@ export class Event {
     UPDATE events e
     SET status = CASE
       WHEN expired.votes_for::DECIMAL
-        / NULLIF(expired.total_members, 0) >= 0.5
+        / NULLIF(expired.total_members, 0) > 0.5
       THEN 'confirmed'::event_status
       ELSE 'closed'::event_status
     END
