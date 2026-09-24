@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import helmet from "helmet";
 
 import { db } from "./db.js";
 import { errorHandler } from "./middleware/errorHandler.js";
@@ -9,6 +10,9 @@ import { router as groupRoutes } from "./routes/groupRoutes.js";
 import ticketmasterRoutes from "./routes/ticketmasterRoutes.js";
 
 const app = express();
+
+app.set("trust proxy", 1);
+app.use(helmet());
 
 const allowedOrigins = [
   "http://localhost:5173",

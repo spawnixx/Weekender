@@ -1,5 +1,5 @@
 import cron from "node-cron";
-import { Event } from "../models/eventModel";
+import { Event } from "../models/eventModel.js";
 
 export function startCloseExpiredEventsJob() {
   return cron.schedule(
